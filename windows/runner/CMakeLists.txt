@@ -40,7 +40,7 @@ set(DDS_COMMON_SRCS
 
 add_library(helloworld_dds STATIC
         ${CMAKE_SOURCE_DIR}/runner/fastdds/HelloWorldPublisher.cpp
-#        ${CMAKE_SOURCE_DIR}/runner/fastdds/HelloWorldSubscriber.cpp
+        ${CMAKE_SOURCE_DIR}/runner/fastdds/HelloWorldSubscriber.cpp
         ${DDS_COMMON_SRCS}
 )
 

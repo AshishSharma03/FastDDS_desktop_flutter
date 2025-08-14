@@ -18,7 +18,7 @@
  */
 
 #include "HelloWorldPubSubTypes.hpp"
-
+#include "HelloWorldPublisher.hpp"
 #include <chrono>
 #include <thread>
 
@@ -187,19 +187,30 @@ public:
     }
 };
 
-int main(
-        int argc,
-        char** argv)
-{
+//int main(
+//        int argc,
+//        char** argv)
+//{
+//    std::cout << "Starting publisher." << std::endl;
+//    uint32_t samples = 10;
+//
+//    HelloWorldPublisher* mypub = new HelloWorldPublisher();
+//    if(mypub->init())
+//    {
+//        mypub->run(samples);
+//    }
+//
+//    delete mypub;
+//    return 0;
+//}
+void run_publisher() {
     std::cout << "Starting publisher." << std::endl;
     uint32_t samples = 10;
 
     HelloWorldPublisher* mypub = new HelloWorldPublisher();
-    if(mypub->init())
-    {
+    if (mypub->init()) {
         mypub->run(samples);
     }
 
     delete mypub;
-    return 0;
 }

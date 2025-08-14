@@ -18,7 +18,7 @@
  */
 
 #include "HelloWorldPubSubTypes.hpp"
-
+#include "HelloWorldSubscriber.hpp" /
 #include <chrono>
 #include <thread>
 
@@ -183,19 +183,32 @@ public:
 
 };
 
-int main(
-        int argc,
-        char** argv)
-{
+//int main(
+//        int argc,
+//        char** argv)
+//{
+//    std::cout << "Starting subscriber." << std::endl;
+//    uint32_t samples = 10;
+//
+//    HelloWorldSubscriber* mysub = new HelloWorldSubscriber();
+//    if (mysub->init())
+//    {
+//        mysub->run(samples);
+//    }
+//
+//    delete mysub;
+//    return 0;
+//}
+
+
+void run_subscriber() {
     std::cout << "Starting subscriber." << std::endl;
     uint32_t samples = 10;
 
     HelloWorldSubscriber* mysub = new HelloWorldSubscriber();
-    if (mysub->init())
-    {
+    if (mysub->init()) {
         mysub->run(samples);
     }
 
     delete mysub;
-    return 0;
 }

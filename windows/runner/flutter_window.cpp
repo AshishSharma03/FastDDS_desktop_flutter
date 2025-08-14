@@ -2,7 +2,11 @@
 #include <flutter/method_channel.h>
 #include <flutter/standard_method_codec.h>
 #include <optional>
+#include <thread>  // <-- Add this
+#include <iostream> // optional if using std::cout
 #include "flutter/generated_plugin_registrant.h"
+#include "fastdds/HelloWorldPublisher.hpp"
+#include "fastdds/HelloWorldSubscriber.hpp"
 
 
 FlutterWindow::FlutterWindow(const flutter::DartProject& project)
@@ -48,20 +52,15 @@ bool FlutterWindow::OnCreate() {
             [](const flutter::MethodCall<flutter::EncodableValue>& call,
                std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
 
-                if (call.method_name() == "get") {
-                    result->Success(flutter::EncodableValue(counter_value));
+                if (call.method_name() == "startPublisher") {
+                    std::thread(run_publisher).detach();
+                    result->Success(flutter::EncodableValue(true));
                     return;
                 }
 
-                if (call.method_name() == "increment") {
-                    counter_value += 1;
-                    result->Success(flutter::EncodableValue(counter_value));
-                    return;
-                }
-
-                if (call.method_name() == "reset") {
-                    counter_value = 0;
-                    result->Success(flutter::EncodableValue(counter_value));
+                if (call.method_name() == "startSubscriber") {
+                    std::thread(run_subscriber).detach();
+                    result->Success(flutter::EncodableValue(true));
                     return;
                 }
 

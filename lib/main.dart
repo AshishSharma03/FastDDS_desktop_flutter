@@ -5,44 +5,29 @@ void main() => runApp(const MyApp());
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
   @override
   State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
   static const _channel = MethodChannel('counter_channel');
-  int _counter = 0;
 
-  @override
-  void initState() {
-    super.initState();
-    _loadCounter();
-  }
-
-  Future<void> _loadCounter() async {
+  Future<void> _startPublisher() async {
     try {
-      final value = await _channel.invokeMethod<int>('get');
-      setState(() => _counter = value ?? 0);
+      await _channel.invokeMethod('startPublisher');
+      debugPrint('Publisher started');
     } on PlatformException catch (e) {
-      debugPrint('get error: $e');
+      debugPrint('startPublisher error: $e');
     }
   }
 
-  Future<void> _increment() async {
+  Future<void> _startSubscriber() async {
     try {
-      final value = await _channel.invokeMethod<int>('increment');
-      setState(() => _counter = value ?? _counter);
+      await _channel.invokeMethod('startSubscriber');
+      debugPrint('Subscriber started');
     } on PlatformException catch (e) {
-      debugPrint('increment error: $e');
-    }
-  }
-
-  Future<void> _reset() async {
-    try {
-      final value = await _channel.invokeMethod<int>('reset');
-      setState(() => _counter = value ?? 0);
-    } on PlatformException catch (e) {
-      debugPrint('reset error: $e');
+      debugPrint('startSubscriber error: $e');
     }
   }
 
@@ -50,20 +35,18 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('Flutter Desktop + C++ Counter')),
+        appBar: AppBar(title: const Text('Flutter Desktop DDS Example')),
         body: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+          child: Wrap(
+            spacing: 16,
             children: [
-              const Text('Counter value from C++:', style: TextStyle(fontSize: 18)),
-              Text('$_counter', style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 16),
-              Wrap(
-                spacing: 12,
-                children: [
-                  ElevatedButton(onPressed: _increment, child: const Text('Increment (C++)')),
-                  OutlinedButton(onPressed: _reset, child: const Text('Reset (C++)')),
-                ],
+              ElevatedButton(
+                onPressed: _startPublisher,
+                child: const Text('Start Publisher'),
+              ),
+              ElevatedButton(
+                onPressed: _startSubscriber,
+                child: const Text('Start Subscriber'),
               ),
             ],
           ),
