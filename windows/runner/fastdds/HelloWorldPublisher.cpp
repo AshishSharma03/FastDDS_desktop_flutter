@@ -113,11 +113,15 @@ public:
         DomainParticipantFactory::get_instance()->delete_participant(participant_);
     }
 
+    void setMessage(const std::string& msg)
+    {
+        hello_.message(msg);
+    }
     //!Initialize the publisher
     bool init()
     {
         hello_.index(0);
-        hello_.message("HelloWorld");
+
 
         DomainParticipantQos participantQos;
         participantQos.name("Participant_publisher");
@@ -203,14 +207,45 @@ public:
 //    delete mypub;
 //    return 0;
 //}
+
+HelloWorldPublisher* mypub = nullptr;
 void run_publisher() {
-    std::cout << "Starting publisher." << std::endl;
-    uint32_t samples = 10;
+    std::cout << "[run_publisher] Starting publisher." << std::endl;
 
-    HelloWorldPublisher* mypub = new HelloWorldPublisher();
-    if (mypub->init()) {
-        mypub->run(samples);
+    if (mypub == nullptr) {
+        mypub = new HelloWorldPublisher();
+        if (mypub->init()) {
+            std::cout << "[run_publisher] Publisher initialized." << std::endl;
+        } else {
+            std::cerr << "[run_publisher] Publisher init failed." << std::endl;
+            delete mypub;
+            mypub = nullptr;
+        }
+    } else {
+        std::cout << "[run_publisher] Publisher already running." << std::endl;
     }
+}
 
-    delete mypub;
+
+void on_flutter_message(const std::string& msg) {
+//    std::cout << "[HelloWorldPublisher] Received message from Flutter: " << msg << std::endl;
+
+
+    if (mypub != nullptr)
+    {
+        mypub->setMessage(msg); // Set the message received from Flutter
+        mypub->publish();       // Immediately publish it
+    } else
+    {
+        std::cerr << "[HelloWorldPublisher] Error: Publisher instance is null, cannot publish message." << std::endl;
+    }
+}
+
+
+void stop_publisher() {
+    if (mypub != nullptr) {
+        delete mypub;   // Calls destructor and cleans everything
+        mypub = nullptr;
+        std::cout << "Publisher stopped and resources released." << std::endl;
+    }
 }

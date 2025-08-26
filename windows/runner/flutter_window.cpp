@@ -7,8 +7,8 @@
 #include "flutter/generated_plugin_registrant.h"
 #include "fastdds/HelloWorldPublisher.hpp"
 #include "fastdds/HelloWorldSubscriber.hpp"
-
-
+#include <string>
+#include <fstream>
 FlutterWindow::FlutterWindow(const flutter::DartProject& project)
     : project_(project) {}
 
@@ -18,6 +18,13 @@ bool FlutterWindow::OnCreate() {
   if (!Win32Window::OnCreate()) {
     return false;
   }
+    // --- Allocate a console so std::cout works in the .exe ---
+    AllocConsole();
+    FILE* fDummy;
+    freopen_s(&fDummy, "CONOUT$", "w", stdout);
+    freopen_s(&fDummy, "CONOUT$", "w", stderr);
+    std::cout << "Console attached for logging" << std::endl;
+    // ---------------------------------------------------------
 
   RECT frame = GetClientArea();
 
@@ -58,8 +65,41 @@ bool FlutterWindow::OnCreate() {
                     return;
                 }
 
+                if (call.method_name() == "SentMsg") {
+                    if (call.arguments()) {
+                        const flutter::EncodableValue& args = *call.arguments();
+                        if (const std::string* msg = std::get_if<std::string>(&args)) {
+                            std::string message_copy = *msg; // copy here
+                            // Run in a separate thread to avoid blocking Flutter
+                            std::thread([message_copy]() {
+//                                std::cout << "[FlutterWindow] Received message from Flutter: " << message_copy << std::endl;
+                                on_flutter_message(message_copy);
+                            }).detach();
+                            result->Success(flutter::EncodableValue(true));
+                        } else {
+                            result->Error("Invalid argument", "Expected a string");
+                        }
+                    } else {
+                        result->Error("No argument", "Expected a string argument");
+                    }
+                    return;
+                }
+
+                if(call.method_name() == "stopPublisher"){
+                    std::thread(stop_publisher).detach();
+                    result->Success(flutter::EncodableValue(true));
+                    return;
+                }
+
                 if (call.method_name() == "startSubscriber") {
                     std::thread(run_subscriber).detach();
+                    result->Success(flutter::EncodableValue(true));
+                    return;
+                }
+
+
+                if(call.method_name() == "stopPublisher"){
+                    std::thread(stop_publisher).detach();
                     result->Success(flutter::EncodableValue(true));
                     return;
                 }
